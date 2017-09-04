@@ -142,26 +142,32 @@ Public Class Form1
     End Sub
 
     Private Sub NewMails(ByVal sender As Compte, ByVal count As UShort)
-        Me.Invoke(Sub()
-                      DataGridView1.Rows(utilisateurs.IndexOf(sender)).Cells(0).Value = My.Resources.nouveauxmessages
-                      DataGridView1.Rows(utilisateurs.IndexOf(sender)).Cells(0).ToolTipText = "Nouveaux messages !"
-                      If UtilisateursRecherche.Count = utilisateurs.Count Then
-                          Label1.Text = "Nouveaux messages."
-                          Label1.ForeColor = Color.Green
-                          PictureBox1.Image = My.Resources.nouveauxmessages
-                      End If
-                      Dim a As New Dialog5
-                      If sender.Plateform = EManENTNewMailsInformer.Compte.Plateforme.Agora06 Then
-                          a.Label3.Text &= " Agora06 "
-                      ElseIf sender.Plateform = EManENTNewMailsInformer.Compte.Plateforme.Atrium Then
-                          a.Label3.Text &= " Atrium "
-                      ElseIf sender.Plateform = EManENTNewMailsInformer.Compte.Plateforme.Enteduc Then
-                          a.Label3.Text &= " Enteduc "
-                      End If
-                      a.Label3.Text &= sender.UserName
-                      a.Show()
-                      a.BringToFront()
-                  End Sub)
+        If count > 0 Then
+            Me.Invoke(Sub()
+                          DataGridView1.Rows(utilisateurs.IndexOf(sender)).Cells(0).Value = My.Resources.nouveauxmessages
+                          DataGridView1.Rows(utilisateurs.IndexOf(sender)).Cells(0).ToolTipText = "Nouveaux messages !"
+                          If UtilisateursRecherche.Count = utilisateurs.Count Then
+                              Label1.Text = "Nouveaux messages."
+                              Label1.ForeColor = Color.Green
+                              PictureBox1.Image = My.Resources.nouveauxmessages
+                          End If
+                          Dim a As New Dialog5
+                          If sender.Plateform = EManENTNewMailsInformer.Compte.Plateforme.Agora06 Then
+                              a.Label3.Text &= " Agora06 "
+                          ElseIf sender.Plateform = EManENTNewMailsInformer.Compte.Plateforme.Atrium Then
+                              a.Label3.Text &= " Atrium "
+                          ElseIf sender.Plateform = EManENTNewMailsInformer.Compte.Plateforme.Enteduc Then
+                              a.Label3.Text &= " Enteduc "
+                          End If
+                          a.Label3.Text &= sender.UserName
+                          a.Show()
+                          a.BringToFront()
+                      End Sub)
+        ElseIf label1.Text = "Nouveaux messages." Then
+            Label1.Text = "Recherche des nouveaux messages..."
+            Label1.ForeColor = Color.Green
+            PictureBox1.Image = My.Resources.validé
+        End If
     End Sub
 
     Friend Function doesBrowserExist(ByVal compte As Compte) As Boolean
@@ -266,38 +272,34 @@ Public Class Form1
                     handled = True
                     Exit Sub
                 End If
-                Dim slist As List(Of DOM.DOMNode) = browser.GetDocument().GetElementById("_145_navAccountControls").GetElementsByTagName("span")
-                If slist.Count = 0 Then
-                    retours.Add(New RetourTraitement(compte, Retour.UNEXPECTED_ERROR))
-                    handled = True
-                    Exit Sub
-                End If
                 retours.Add(New RetourTraitement(compte, Retour.CONNECTED))
-                Dim m As DOM.DOMElement = Nothing
-                For Each ele As DOM.DOMElement In slist
-                    If ele.GetAttribute("className") = "badge badge-notify" Then m = ele
-                Next
-                If Not m Is Nothing Then
-                    If Not m.TextContent = "" AndAlso CUShort(m.TextContent) > news Then
-                        compte.ReceiveMails(CUShort(m.TextContent))
+                Dim m As DOM.DOMNode = Nothing
+                Dim slist As List(Of DOM.DOMNode) = browser.GetDocument().GetElementById("_145_navAccountControls").GetElementsByClassName("badge badge-notify")
+                If Not slist.Count = 0 Then
+                    m = slist(0)
+                    If Not m.TextContent = "" Then
+                        If CUShort(m.TextContent) > news Then
+                            compte.ReceiveMails(CUShort(m.TextContent))
+                        End If
+                        news = CUShort(m.TextContent)
                     End If
-                    news = CUShort(m.TextContent)
-                Else news = 0US
                 End If
             End If
-            While Not quitting
+                While Not quitting
                 Thread.Sleep(30000)
-                Dim nm As UShort = CheckMails(compte, browser, waitEvent)
-                If nm > news Then
-                    Try
-                        compte.ReceiveMails(nm)
-                    Catch ex As HandledException
-                        handled = True
-                        Exit Sub
-                    Catch ex As Exception
-                        Exit Sub
-                    End Try
+                Dim nm As UShort
+                Try
+                    nm = CheckMails(compte, browser, waitEvent)
+                Catch ex As HandledException
+                    handled = True
+                    Exit Sub
+                Catch ex As Exception
+                    Exit Sub
+                End Try
+                If nm > news Or nm = 0US Then
+                    compte.ReceiveMails(nm)
                 End If
+                news = nm
             End While
         Catch ex As ThreadInterruptedException
             retours.Add(New RetourTraitement(compte, Retour.INTERRUPTED))
@@ -354,22 +356,16 @@ Public Class Form1
                 retours.Add(New RetourTraitement(utilisateur, Retour.UNEXPECTED_ERROR))
                 Throw New HandledException
             End If
-            Dim slist As List(Of DOM.DOMNode) = browser.GetDocument().GetElementById("_145_navAccountControls").GetElementsByTagName("span")
-            If slist.Count = 0 Then
-                retours.Add(New RetourTraitement(utilisateur, Retour.UNEXPECTED_ERROR))
-                Throw New HandledException
-            End If
-            Dim m As DOM.DOMElement = Nothing
-            For Each ele As DOM.DOMElement In slist
-                If ele.GetAttribute("className") = "badge badge-notify" Then m = ele
-            Next
-            If Not m Is Nothing Then
+            Dim slist As List(Of DOM.DOMNode) = browser.GetDocument().GetElementById("_145_navAccountControls").GetElementsByClassName("badge badge-notify")
+            If Not slist.Count = 0 Then
+                Dim m As DOM.DOMNode = slist(0)
                 If Not m.TextContent = "" Then
                     Return CUShort(m.TextContent)
                 Else
                     Return 0US
                 End If
-            Else Return 0US
+            Else
+                Return 0US
             End If
         End If
         Return 0US
