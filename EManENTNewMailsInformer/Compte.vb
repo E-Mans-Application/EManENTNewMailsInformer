@@ -72,6 +72,7 @@
         Try
             Return New Compte(b(0), b(1), CType(b(2), Plateforme))
         Catch ex As Exception
+            Throw New ArgumentException
             Return Nothing
         End Try
     End Function
