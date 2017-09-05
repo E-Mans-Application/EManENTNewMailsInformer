@@ -17,10 +17,6 @@ Namespace My
                 MsgBox("La dépendance DotNetBrowser.dll est introuvable. Assurez-vous qu'elle soit dans le même répertoire que le programme puis réesayez.", MsgBoxStyle.Critical, "EManENTNewMailsInformer - Echec du démarrage.")
                 End
             End If
-            If Not IO.File.Exists(System.Windows.Forms.Application.StartupPath & "\DotNetBrowser.Chromium.dll") Then
-                MsgBox("La dépendance DotNetBrowser.Chromium.dll est introuvable. Assurez-vous qu'elle soit dans le même répertoire que le programme puis réesayez.", MsgBoxStyle.Critical, "EManENTNewMailsInformer - Echec du démarrage.")
-                End
-            End If
             For Each comm In Application.CommandLineArgs
                 If comm = "/q" Then
                     QuietStart = True
