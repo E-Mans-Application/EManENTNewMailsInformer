@@ -57,11 +57,13 @@
     <ApplicationIcon>EManENTNewMailsinformer.ico</ApplicationIcon>
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="DotNetBrowser">
-      <HintPath>..\eenwiclient\references\DotNetBrowser.dll</HintPath>
+    <Reference Include="DotNetBrowser, Version=1.11.1.0, Culture=neutral, PublicKeyToken=b0b5aaca9c95c84e, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>references\DotNetBrowser.dll</HintPath>
     </Reference>
-    <Reference Include="DotNetBrowser.Chromium">
-      <HintPath>..\eenwiclient\references\DotNetBrowser.Chromium.dll</HintPath>
+    <Reference Include="DotNetBrowser.Chromium, Version=1.11.1.0, Culture=neutral, PublicKeyToken=b0b5aaca9c95c84e, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>references\DotNetBrowser.Chromium.dll</HintPath>
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.Data" />
