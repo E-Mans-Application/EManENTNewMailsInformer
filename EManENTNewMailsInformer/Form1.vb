@@ -22,6 +22,7 @@ Public Class Form1
     Friend retoursThread As New Thread(AddressOf GererRetours)
     Friend retours As New List(Of RetourTraitement)
     Private quitting As Boolean
+    Friend password As String
 
     Public Function AES_Encrypt(ByVal input As String, ByVal pass As String) As String
         Dim AES As New System.Security.Cryptography.RijndaelManaged
@@ -65,39 +66,69 @@ Public Class Form1
 
     Friend Sub SaveUsers()
         Dim cont As String = Nothing
+        If Not password = Nothing Or Not password = "" Then
+            cont = AES_Encrypt("Encrypted-personal-password", "ppvBR<q3kbb3%~tZ6urN:,4?&5T-9Dffa9#@UEP:D4x5[5NQ9Af)Vr9!2-7a8DXK5Gu4ULS!S.3996/u?f65%&aLcEE?9#.bP>$}M97r46Aw64q52-;)Z22v:s8fHV&n5H{Y6eH3Dnyg9ib8,4!N6C%jc~E59zMQ36Th#VYuRR5Qwt%LN]7N5jefZb9e!L/@sAJ)[=5(@FgVy*^4$p3Az4(zW694z#TM^7$X7u3P63Bm~z)j]@b3q6vB)(yU[j:+")
+        End If
+        Dim users As String = "EManENTNewMailsInformer-configuration file"
         For Each user In utilisateurs
-            cont &= user.ToString()
+            users &= user.ToString()
         Next
-        cont = AES_Encrypt(cont, "c#k&>*6<r5jGa889]kw4{79_>2gbG5tK]cAM246eVs?7;3Ft]5Di_533dM(3zbYnZ}*jb4Ua>96zH2bHr35j#H?Px$*LF_G9GhDt)TF[*,YMJ!&A;p987BfzE/qM2h779x^7MVpF:sA<J~9ySa;82g3/}WYe3ZM_]e26PP/*f7Wj}-D8x22>qr3n*K<[]42S^875u9K[74r}XG*8KG83F8zVbEeD45?!C9bS*UicnQRX9n!G@-v]]*aGZi@cp(u5")
+        If Not password = Nothing Or Not password = "" Then
+            cont += AES_Encrypt(users, "c#k&>*6<r5jGa889]kw4{79_>2gbG5tK]cAM246eVs?7;3Ft]5Di_53" + password + "3dM(3zbYnZ}*jb4Ua>96zH2bHr35j#H?Px$*LF_G9GhDt)TF[*,YMJ!&A;p987BfzE/qM2h779x^7MVpF:sA<J~9ySa;82g3/}WYe3ZM_]e26PP/*f7Wj}-D8x22>qr3n*K<[]42S^875u9K[74r}XG*8KG83F8zVbEeD45?!C9bS*UicnQRX9n!G@-v]]*aGZi@cp(u5")
+        Else
+            cont = AES_Encrypt(users, "c#k&>*6<r5jGa889]kw4{79_>2gbG5tK]cAM246eVs?7;3Ft]5Di_533dM(3zbYnZ}*jb4Ua>96zH2bHr35j#H?Px$*LF_G9GhDt)TF[*,YMJ!&A;p987BfzE/qM2h779x^7MVpF:sA<J~9ySa;82g3/}WYe3ZM_]e26PP/*f7Wj}-D8x22>qr3n*K<[]42S^875u9K[74r}XG*8KG83F8zVbEeD45?!C9bS*UicnQRX9n!G@-v]]*aGZi@cp(u5")
+        End If
         Try
             IO.File.WriteAllText(Application.StartupPath & "\comptes.ini", cont)
         Catch ex As Exception
         End Try
     End Sub
 
-    Friend Sub LoadUsers()
-        Try
-            If Not IO.File.Exists(Application.StartupPath & "\comptes.ini") Then Exit Sub
-            Dim cont As String = IO.File.ReadAllText(Application.StartupPath & "\comptes.ini")
-            cont = AES_Decrypt(cont, "c#k&>*6<r5jGa889]kw4{79_>2gbG5tK]cAM246eVs?7;3Ft]5Di_533dM(3zbYnZ}*jb4Ua>96zH2bHr35j#H?Px$*LF_G9GhDt)TF[*,YMJ!&A;p987BfzE/qM2h779x^7MVpF:sA<J~9ySa;82g3/}WYe3ZM_]e26PP/*f7Wj}-D8x22>qr3n*K<[]42S^875u9K[74r}XG*8KG83F8zVbEeD45?!C9bS*UicnQRX9n!G@-v]]*aGZi@cp(u5")
-            Dim com As String() = cont.Split("}"c)
-            For Each Co In com
-                If Co.StartsWith("Compte{") Then
-                    utilisateurs.Add(EManENTNewMailsInformer.Compte.Join(Co & "}"))
+    Friend Sub LoadUsers(Optional onStartup As Boolean = False, Optional askPassword As Boolean = True)
+        On Error GoTo er
+        If Not IO.File.Exists(Application.StartupPath & "\comptes.ini") Then Exit Sub
+        Dim cont As String = IO.File.ReadAllText(Application.StartupPath & "\comptes.ini")
+        If (onStartup Or askPassword) And cont.StartsWith(AES_Encrypt("Encrypted-personal-password", "ppvBR<q3kbb3%~tZ6urN:,4?&5T-9Dffa9#@UEP:D4x5[5NQ9Af)Vr9!2-7a8DXK5Gu4ULS!S.3996/u?f65%&aLcEE?9#.bP>$}M97r46Aw64q52-;)Z22v:s8fHV&n5H{Y6eH3Dnyg9ib8,4!N6C%jc~E59zMQ36Th#VYuRR5Qwt%LN]7N5jefZb9e!L/@sAJ)[=5(@FgVy*^4$p3Az4(zW694z#TM^7$X7u3P63Bm~z)j]@b3q6vB)(yU[j:+")) Then
+            If Not LoginForm4.Visible Then
+                If Not LoginForm4.ShowDialog() = DialogResult.OK Then
+                    Quit()
                 End If
-            Next
-            RefreshUsers()
-        Catch ex As Exception
-        End Try
+            End If
+        End If
+        If Not password = Nothing Or Not password = "" Then
+            cont = Mid(cont, AES_Encrypt("Encrypted-personal-password", "ppvBR<q3kbb3%~tZ6urN:,4?&5T-9Dffa9#@UEP:D4x5[5NQ9Af)Vr9!2-7a8DXK5Gu4ULS!S.3996/u?f65%&aLcEE?9#.bP>$}M97r46Aw64q52-;)Z22v:s8fHV&n5H{Y6eH3Dnyg9ib8,4!N6C%jc~E59zMQ36Th#VYuRR5Qwt%LN]7N5jefZb9e!L/@sAJ)[=5(@FgVy*^4$p3Az4(zW694z#TM^7$X7u3P63Bm~z)j]@b3q6vB)(yU[j:+").Length + 1)
+            cont = AES_Decrypt(cont, "c#k&>*6<r5jGa889]kw4{79_>2gbG5tK]cAM246eVs?7;3Ft]5Di_53" & password & "3dM(3zbYnZ}*jb4Ua>96zH2bHr35j#H?Px$*LF_G9GhDt)TF[*,YMJ!&A;p987BfzE/qM2h779x^7MVpF:sA<J~9ySa;82g3/}WYe3ZM_]e26PP/*f7Wj}-D8x22>qr3n*K<[]42S^875u9K[74r}XG*8KG83F8zVbEeD45?!C9bS*UicnQRX9n!G@-v]]*aGZi@cp(u5")
+            If cont = Nothing OrElse Not cont.StartsWith("EManENTNewMailsInformer-configuration file") Then
+                MsgBox("Le mot de passe est incorrect. Veuillez réessayer.", MsgBoxStyle.Critical, "Mot Decimal passe incorrect.")
+                LoadUsers(askPassword:=True)
+                Exit Sub
+            End If
+        Else
+            cont = AES_Decrypt(cont, "c#k&>*6<r5jGa889]kw4{79_>2gbG5tK]cAM246eVs?7;3Ft]5Di_533dM(3zbYnZ}*jb4Ua>96zH2bHr35j#H?Px$*LF_G9GhDt)TF[*,YMJ!&A;p987BfzE/qM2h779x^7MVpF:sA<J~9ySa;82g3/}WYe3ZM_]e26PP/*f7Wj}-D8x22>qr3n*K<[]42S^875u9K[74r}XG*8KG83F8zVbEeD45?!C9bS*UicnQRX9n!G@-v]]*aGZi@cp(u5")
+        End If
+        cont = Mid(cont, "EManENTNewMailsInformer-configuration file".Length + 1)
+        Dim com As String() = cont.Split("}"c)
+        For Each Co In com
+            If Co.StartsWith("Compte{") Then
+                utilisateurs.Add(EManENTNewMailsInformer.Compte.Join(Co & "}"))
+            End If
+        Next
+        RefreshUsers()
+        If onStartup Then
+            CheckStartup()
+            retoursThread.Start()
+        End If
+        Exit Sub
+er:
     End Sub
 
-    Private Sub Panel2_MouseEnter(sender As Object, e As EventArgs) Handles Panel1.MouseEnter, Panel2.MouseEnter, Panel3.MouseEnter, Panel4.MouseEnter
+    Private Sub Panel2_MouseEnter(sender As Object, e As EventArgs) Handles Panel1.MouseEnter, Panel2.MouseEnter, Panel3.MouseEnter, Panel4.MouseEnter, Panel6.MouseEnter
         On Error Resume Next
         If Not DirectCast(sender, Panel).Enabled Then Exit Sub
         DirectCast(sender, Panel).BackColor = Color.FromArgb(192, 210, 192)
     End Sub
 
-    Private Sub Panel2_MouseLeave(sender As Object, e As EventArgs) Handles Panel1.MouseLeave, Panel2.MouseLeave, Panel3.MouseLeave, Panel4.MouseLeave
+    Private Sub Panel2_MouseLeave(sender As Object, e As EventArgs) Handles Panel1.MouseLeave, Panel2.MouseLeave, Panel3.MouseLeave, Panel4.MouseLeave, Panel6.MouseLeave
         On Error Resume Next
         If Not DirectCast(sender, Panel).Enabled Then Exit Sub
         DirectCast(sender, Panel).BackColor = DefaultBackColor
@@ -105,9 +136,18 @@ Public Class Form1
 
     Private Sub Form1_Load(sender As Object, e As EventArgs) Handles MyBase.Load
         On Error Resume Next
-        LoadUsers()
-        CheckStartup()
-        retoursThread.Start()
+        LoadUsers(True)
+    End Sub
+
+    Private Sub ShowDisclaimer()
+        Try
+            If Not File.Exists(Application.StartupPath + "\disclaimer.ini") OrElse
+          Not File.ReadAllText(Application.StartupPath + "\disclaimer.ini") = "show:false" Then
+                If Not DNBDisclaimer.Visible Then DNBDisclaimer.ShowDialog()
+            End If
+        Catch ex As Exception
+            If Not DNBDisclaimer.Visible Then DNBDisclaimer.ShowDialog()
+        End Try
     End Sub
 
     Friend Sub RefreshUsers(Optional forceNewThreads As Boolean = True)
@@ -610,19 +650,28 @@ Public Class Form1
     End Sub
 
     Private Sub Quit()
+        On Error GoTo er
         quitting = True
+        If Not password = Nothing Then password = Nothing
         Label1.Text = "Arrêt en cours..."
         Label1.ForeColor = Color.Black
         PictureBox1.Image = My.Resources.attente
         UtilisateursRecherche.Clear()
         DataGridView1.Rows.Clear()
-        retoursThread.Interrupt()
-        retoursThread.Join()
-        For Each th In utilisateursThreads
-            th.Interrupt()
-            th.Join()
-        Next
+        If retoursThread.IsAlive Then
+            retoursThread.Interrupt()
+            retoursThread.Join()
+        End If
+        While utilisateursThreads.Count > 0
+            If Not utilisateursThreads(0).IsAlive Then
+                utilisateursThreads.RemoveAt(0)
+                Continue While
+            End If
+            utilisateursThreads(0).Interrupt()
+            utilisateursThreads(0).Join()
+        End While
         Application.Exit()
+er:
         End
     End Sub
 
@@ -686,6 +735,14 @@ Public Class Form1
         Me.Show()
         Me.BringToFront()
         NotifyIcon1.Visible = False
+    End Sub
+
+    Private Sub Timer2_Tick(sender As Object, e As EventArgs) Handles Timer2.Tick
+        ShowDisclaimer()
+    End Sub
+
+    Private Sub Panel6_Click(sender As Object, e As EventArgs) Handles Panel6.Click
+        If Not LoginForm3.Visible Then LoginForm3.ShowDialog()
     End Sub
 
     Private Sub Form1_FormClosed(sender As Object, e As FormClosedEventArgs) Handles Me.FormClosed

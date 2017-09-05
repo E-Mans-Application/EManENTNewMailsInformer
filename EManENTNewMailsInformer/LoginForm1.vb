@@ -12,7 +12,7 @@
 
     Private Sub OK_Click(ByVal sender As System.Object, ByVal e As System.EventArgs) Handles OK.Click
         On Error Resume Next
-        If UsernameTextBox.Text = "" Or PasswordTextBox.Text = "" Or ComboBox1.SelectedItem Is "" Then
+        If UsernameTextBox.Text = "" Or PasswordTextBox.Text = "" Or ComboBox1.SelectedItem Is Nothing Then
             MsgBox("Veuillez remplir toutes les informations demandées.", MsgBoxStyle.Critical, "Erreur")
             Exit Sub
         End If

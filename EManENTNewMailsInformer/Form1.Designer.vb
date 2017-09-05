@@ -27,19 +27,17 @@ Partial Class Form1
         Me.Label1 = New System.Windows.Forms.Label()
         Me.Label2 = New System.Windows.Forms.Label()
         Me.CheckBox1 = New System.Windows.Forms.CheckBox()
-        Me.Timer1 = New System.Windows.Forms.Timer(Me.components)
         Me.Timer2 = New System.Windows.Forms.Timer(Me.components)
         Me.DataGridView1 = New System.Windows.Forms.DataGridView()
         Me.Etat = New System.Windows.Forms.DataGridViewImageColumn()
         Me.Compte = New System.Windows.Forms.DataGridViewTextBoxColumn()
         Me.Plateforme = New System.Windows.Forms.DataGridViewTextBoxColumn()
         Me.ToolTip1 = New System.Windows.Forms.ToolTip(Me.components)
-        Me.Panel4 = New System.Windows.Forms.Panel()
         Me.Label5 = New System.Windows.Forms.Label()
         Me.Label6 = New System.Windows.Forms.Label()
         Me.Label7 = New System.Windows.Forms.Label()
-        Me.DataGridViewImageColumn1 = New System.Windows.Forms.DataGridViewImageColumn()
-        Me.PictureBox1 = New System.Windows.Forms.PictureBox()
+        Me.Panel4 = New System.Windows.Forms.Panel()
+        Me.Panel6 = New System.Windows.Forms.Panel()
         Me.Panel3 = New System.Windows.Forms.Panel()
         Me.Panel1 = New System.Windows.Forms.Panel()
         Me.Panel2 = New System.Windows.Forms.Panel()
@@ -52,11 +50,13 @@ Partial Class Form1
         Me.PictureBox2 = New System.Windows.Forms.PictureBox()
         Me.Label4 = New System.Windows.Forms.Label()
         Me.Timer3 = New System.Windows.Forms.Timer(Me.components)
+        Me.DataGridViewImageColumn1 = New System.Windows.Forms.DataGridViewImageColumn()
+        Me.PictureBox1 = New System.Windows.Forms.PictureBox()
         CType(Me.DataGridView1, System.ComponentModel.ISupportInitialize).BeginInit()
-        CType(Me.PictureBox1, System.ComponentModel.ISupportInitialize).BeginInit()
         Me.ContextMenuStrip1.SuspendLayout()
         Me.Panel5.SuspendLayout()
         CType(Me.PictureBox2, System.ComponentModel.ISupportInitialize).BeginInit()
+        CType(Me.PictureBox1, System.ComponentModel.ISupportInitialize).BeginInit()
         Me.SuspendLayout()
         '
         'Label1
@@ -92,11 +92,6 @@ Partial Class Form1
         Me.CheckBox1.TabIndex = 6
         Me.CheckBox1.Text = "Démarrer automatiquement à l'ouverture de session."
         Me.CheckBox1.UseVisualStyleBackColor = True
-        '
-        'Timer1
-        '
-        Me.Timer1.Enabled = True
-        Me.Timer1.Interval = 10
         '
         'Timer2
         '
@@ -146,17 +141,6 @@ Partial Class Form1
         Me.Plateforme.ReadOnly = True
         Me.Plateforme.Visible = False
         '
-        'Panel4
-        '
-        Me.Panel4.BackgroundImage = CType(resources.GetObject("Panel4.BackgroundImage"), System.Drawing.Image)
-        Me.Panel4.BackgroundImageLayout = System.Windows.Forms.ImageLayout.Stretch
-        Me.Panel4.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle
-        Me.Panel4.Location = New System.Drawing.Point(11, 112)
-        Me.Panel4.Name = "Panel4"
-        Me.Panel4.Size = New System.Drawing.Size(30, 30)
-        Me.Panel4.TabIndex = 3
-        Me.ToolTip1.SetToolTip(Me.Panel4, "Réessayer")
-        '
         'Label5
         '
         Me.Label5.BackColor = System.Drawing.Color.Silver
@@ -188,26 +172,27 @@ Partial Class Form1
         Me.Label7.Text = "->"
         Me.ToolTip1.SetToolTip(Me.Label7, "Mettre en arrière plan")
         '
-        'DataGridViewImageColumn1
+        'Panel4
         '
-        Me.DataGridViewImageColumn1.AutoSizeMode = System.Windows.Forms.DataGridViewAutoSizeColumnMode.Fill
-        Me.DataGridViewImageColumn1.FillWeight = 20.0!
-        Me.DataGridViewImageColumn1.HeaderText = "Etat"
-        Me.DataGridViewImageColumn1.Image = Global.EManENTNewMailsInformer.My.Resources.Resources.avertissement_icone_9768_128
-        Me.DataGridViewImageColumn1.ImageLayout = System.Windows.Forms.DataGridViewImageCellLayout.Stretch
-        Me.DataGridViewImageColumn1.Name = "DataGridViewImageColumn1"
-        Me.DataGridViewImageColumn1.ReadOnly = True
-        Me.DataGridViewImageColumn1.Resizable = System.Windows.Forms.DataGridViewTriState.[False]
+        Me.Panel4.BackgroundImage = CType(resources.GetObject("Panel4.BackgroundImage"), System.Drawing.Image)
+        Me.Panel4.BackgroundImageLayout = System.Windows.Forms.ImageLayout.Stretch
+        Me.Panel4.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle
+        Me.Panel4.Location = New System.Drawing.Point(11, 112)
+        Me.Panel4.Name = "Panel4"
+        Me.Panel4.Size = New System.Drawing.Size(30, 30)
+        Me.Panel4.TabIndex = 3
+        Me.ToolTip1.SetToolTip(Me.Panel4, "Réessayer")
         '
-        'PictureBox1
+        'Panel6
         '
-        Me.PictureBox1.Image = Global.EManENTNewMailsInformer.My.Resources.Resources.male_user_warning_256
-        Me.PictureBox1.Location = New System.Drawing.Point(3, 40)
-        Me.PictureBox1.Name = "PictureBox1"
-        Me.PictureBox1.Size = New System.Drawing.Size(40, 40)
-        Me.PictureBox1.SizeMode = System.Windows.Forms.PictureBoxSizeMode.StretchImage
-        Me.PictureBox1.TabIndex = 5
-        Me.PictureBox1.TabStop = False
+        Me.Panel6.BackgroundImage = Global.EManENTNewMailsInformer.My.Resources.Resources.cadenascles
+        Me.Panel6.BackgroundImageLayout = System.Windows.Forms.ImageLayout.Stretch
+        Me.Panel6.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle
+        Me.Panel6.Location = New System.Drawing.Point(481, 297)
+        Me.Panel6.Name = "Panel6"
+        Me.Panel6.Size = New System.Drawing.Size(50, 50)
+        Me.Panel6.TabIndex = 4
+        Me.ToolTip1.SetToolTip(Me.Panel6, "Protéger l'application")
         '
         'Panel3
         '
@@ -218,6 +203,7 @@ Partial Class Form1
         Me.Panel3.Name = "Panel3"
         Me.Panel3.Size = New System.Drawing.Size(50, 50)
         Me.Panel3.TabIndex = 3
+        Me.ToolTip1.SetToolTip(Me.Panel3, "Supprimer l'utilisateur sélectionné")
         '
         'Panel1
         '
@@ -228,6 +214,7 @@ Partial Class Form1
         Me.Panel1.Name = "Panel1"
         Me.Panel1.Size = New System.Drawing.Size(50, 50)
         Me.Panel1.TabIndex = 3
+        Me.ToolTip1.SetToolTip(Me.Panel1, "Editer l'utilisateur sélectionné")
         '
         'Panel2
         '
@@ -238,6 +225,7 @@ Partial Class Form1
         Me.Panel2.Name = "Panel2"
         Me.Panel2.Size = New System.Drawing.Size(50, 50)
         Me.Panel2.TabIndex = 3
+        Me.ToolTip1.SetToolTip(Me.Panel2, "Ajouter un utilisateur")
         '
         'Label3
         '
@@ -312,11 +300,33 @@ Partial Class Form1
         Me.Timer3.Enabled = True
         Me.Timer3.Interval = 10
         '
+        'DataGridViewImageColumn1
+        '
+        Me.DataGridViewImageColumn1.AutoSizeMode = System.Windows.Forms.DataGridViewAutoSizeColumnMode.Fill
+        Me.DataGridViewImageColumn1.FillWeight = 20.0!
+        Me.DataGridViewImageColumn1.HeaderText = "Etat"
+        Me.DataGridViewImageColumn1.Image = Global.EManENTNewMailsInformer.My.Resources.Resources.avertissement_icone_9768_128
+        Me.DataGridViewImageColumn1.ImageLayout = System.Windows.Forms.DataGridViewImageCellLayout.Stretch
+        Me.DataGridViewImageColumn1.Name = "DataGridViewImageColumn1"
+        Me.DataGridViewImageColumn1.ReadOnly = True
+        Me.DataGridViewImageColumn1.Resizable = System.Windows.Forms.DataGridViewTriState.[False]
+        '
+        'PictureBox1
+        '
+        Me.PictureBox1.Image = Global.EManENTNewMailsInformer.My.Resources.Resources.male_user_warning_256
+        Me.PictureBox1.Location = New System.Drawing.Point(3, 40)
+        Me.PictureBox1.Name = "PictureBox1"
+        Me.PictureBox1.Size = New System.Drawing.Size(40, 40)
+        Me.PictureBox1.SizeMode = System.Windows.Forms.PictureBoxSizeMode.StretchImage
+        Me.PictureBox1.TabIndex = 5
+        Me.PictureBox1.TabStop = False
+        '
         'Form1
         '
         Me.AutoScaleDimensions = New System.Drawing.SizeF(6.0!, 13.0!)
         Me.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font
         Me.ClientSize = New System.Drawing.Size(543, 355)
+        Me.Controls.Add(Me.Panel6)
         Me.Controls.Add(Me.Panel5)
         Me.Controls.Add(Me.Label3)
         Me.Controls.Add(Me.DataGridView1)
@@ -332,13 +342,14 @@ Partial Class Form1
         Me.Icon = CType(resources.GetObject("$this.Icon"), System.Drawing.Icon)
         Me.MaximizeBox = False
         Me.Name = "Form1"
+        Me.StartPosition = System.Windows.Forms.FormStartPosition.CenterScreen
         Me.Text = "EManENTNewMailsInformer"
         CType(Me.DataGridView1, System.ComponentModel.ISupportInitialize).EndInit()
-        CType(Me.PictureBox1, System.ComponentModel.ISupportInitialize).EndInit()
         Me.ContextMenuStrip1.ResumeLayout(False)
         Me.Panel5.ResumeLayout(False)
         Me.Panel5.PerformLayout()
         CType(Me.PictureBox2, System.ComponentModel.ISupportInitialize).EndInit()
+        CType(Me.PictureBox1, System.ComponentModel.ISupportInitialize).EndInit()
         Me.ResumeLayout(False)
         Me.PerformLayout()
 
@@ -351,7 +362,6 @@ Partial Class Form1
     Friend WithEvents Label2 As Label
     Friend WithEvents PictureBox1 As PictureBox
     Friend WithEvents CheckBox1 As CheckBox
-    Friend WithEvents Timer1 As Timer
     Friend WithEvents Timer2 As Timer
     Friend WithEvents DataGridView1 As DataGridView
     Friend WithEvents DataGridViewImageColumn1 As DataGridViewImageColumn
@@ -372,4 +382,5 @@ Partial Class Form1
     Friend WithEvents ContextMenuStrip1 As ContextMenuStrip
     Friend WithEvents AfficherLaFenêtreToolStripMenuItem As ToolStripMenuItem
     Friend WithEvents QuitterToolStripMenuItem As ToolStripMenuItem
+    Friend WithEvents Panel6 As Panel
 End Class

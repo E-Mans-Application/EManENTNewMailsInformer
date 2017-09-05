@@ -131,6 +131,12 @@
     <Compile Include="Dialog1.vb">
       <SubType>Form</SubType>
     </Compile>
+    <Compile Include="DNBDisclaimer.Designer.vb">
+      <DependentUpon>DNBDisclaimer.vb</DependentUpon>
+    </Compile>
+    <Compile Include="DNBDisclaimer.vb">
+      <SubType>Form</SubType>
+    </Compile>
     <Compile Include="Form1.vb">
       <SubType>Form</SubType>
     </Compile>
@@ -149,6 +155,18 @@
       <DependentUpon>LoginForm1.vb</DependentUpon>
     </Compile>
     <Compile Include="LoginForm1.vb">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="LoginForm4.Designer.vb">
+      <DependentUpon>LoginForm4.vb</DependentUpon>
+    </Compile>
+    <Compile Include="LoginForm4.vb">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="LoginForm3.Designer.vb">
+      <DependentUpon>LoginForm3.vb</DependentUpon>
+    </Compile>
+    <Compile Include="LoginForm3.vb">
       <SubType>Form</SubType>
     </Compile>
     <Compile Include="My Project\AssemblyInfo.vb" />
@@ -191,6 +209,9 @@
     <EmbeddedResource Include="Dialog1.resx">
       <DependentUpon>Dialog1.vb</DependentUpon>
     </EmbeddedResource>
+    <EmbeddedResource Include="DNBDisclaimer.resx">
+      <DependentUpon>DNBDisclaimer.vb</DependentUpon>
+    </EmbeddedResource>
     <EmbeddedResource Include="Form1.resx">
       <DependentUpon>Form1.vb</DependentUpon>
     </EmbeddedResource>
@@ -199,6 +220,12 @@
     </EmbeddedResource>
     <EmbeddedResource Include="LoginForm1.resx">
       <DependentUpon>LoginForm1.vb</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="LoginForm4.resx">
+      <DependentUpon>LoginForm4.vb</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="LoginForm3.resx">
+      <DependentUpon>LoginForm3.vb</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="My Project\Resources.resx">
       <Generator>VbMyResourcesResXFileCodeGenerator</Generator>
@@ -257,6 +284,9 @@
   </ItemGroup>
   <ItemGroup>
     <Content Include="EManENTNewMailsinformer.ico" />
+    <None Include="Resources\cadenascles.png" />
+    <None Include="Resources\29771.png" />
+    <None Include="Resources\DotNetBrowser.png" />
     <EmbeddedResource Include="teamdev.licenses" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.VisualBasic.targets" />
