@@ -13,4 +13,4 @@ saved on your computer. The source code and, at the same time, the encryption me
 the encryption key by specifying an arbitrary password. This password will be necessary to decrypt the file where are saved login
 details. Therefore you will have to enter it every time the program starts.
 Any questions, comments or suggestions can be sent to E__Man's Application (emansassociation@gmail.com).
-You can see all E__Man's Application's applications on the web site: https://emansapplication.000webhostapp.com/.
+You can see all E__Man's Application's applications on the website: https://emansapplication.000webhostapp.com/.
