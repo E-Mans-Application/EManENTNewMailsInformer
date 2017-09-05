@@ -9,7 +9,11 @@
     ' telles que le nom d'utilisateur, le nom complet, etc.
 
     Private Sub OK_Click(ByVal sender As System.Object, ByVal e As System.EventArgs) Handles OK.Click
-        Form1.password = PasswordTextBox.Text
+        If PasswordTextBox.Text <> "" Then
+            Form1.password = PasswordTextBox.Text
+        Else
+            Form1.password = String.Empty
+        End If
         PasswordTextBox.Clear()
         Form1.SaveUsers()
         Me.Close()

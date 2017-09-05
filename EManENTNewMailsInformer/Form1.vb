@@ -22,7 +22,7 @@ Public Class Form1
     Friend retoursThread As New Thread(AddressOf GererRetours)
     Friend retours As New List(Of RetourTraitement)
     Private quitting As Boolean
-    Friend password As String
+    Friend password As String = Nothing
 
     Public Function AES_Encrypt(ByVal input As String, ByVal pass As String) As String
         Dim AES As New System.Security.Cryptography.RijndaelManaged
@@ -66,14 +66,14 @@ Public Class Form1
 
     Friend Sub SaveUsers()
         Dim cont As String = Nothing
-        If Not password = Nothing Or Not password = "" Then
+        If Not password = Nothing Or Not password = String.Empty Then
             cont = AES_Encrypt("Encrypted-personal-password", "ppvBR<q3kbb3%~tZ6urN:,4?&5T-9Dffa9#@UEP:D4x5[5NQ9Af)Vr9!2-7a8DXK5Gu4ULS!S.3996/u?f65%&aLcEE?9#.bP>$}M97r46Aw64q52-;)Z22v:s8fHV&n5H{Y6eH3Dnyg9ib8,4!N6C%jc~E59zMQ36Th#VYuRR5Qwt%LN]7N5jefZb9e!L/@sAJ)[=5(@FgVy*^4$p3Az4(zW694z#TM^7$X7u3P63Bm~z)j]@b3q6vB)(yU[j:+")
         End If
         Dim users As String = "EManENTNewMailsInformer-configuration file"
         For Each user In utilisateurs
             users &= user.ToString()
         Next
-        If Not password = Nothing Or Not password = "" Then
+        If Not password = Nothing Or Not password = String.Empty Then
             cont += AES_Encrypt(users, "c#k&>*6<r5jGa889]kw4{79_>2gbG5tK]cAM246eVs?7;3Ft]5Di_53" + password + "3dM(3zbYnZ}*jb4Ua>96zH2bHr35j#H?Px$*LF_G9GhDt)TF[*,YMJ!&A;p987BfzE/qM2h779x^7MVpF:sA<J~9ySa;82g3/}WYe3ZM_]e26PP/*f7Wj}-D8x22>qr3n*K<[]42S^875u9K[74r}XG*8KG83F8zVbEeD45?!C9bS*UicnQRX9n!G@-v]]*aGZi@cp(u5")
         Else
             cont = AES_Encrypt(users, "c#k&>*6<r5jGa889]kw4{79_>2gbG5tK]cAM246eVs?7;3Ft]5Di_533dM(3zbYnZ}*jb4Ua>96zH2bHr35j#H?Px$*LF_G9GhDt)TF[*,YMJ!&A;p987BfzE/qM2h779x^7MVpF:sA<J~9ySa;82g3/}WYe3ZM_]e26PP/*f7Wj}-D8x22>qr3n*K<[]42S^875u9K[74r}XG*8KG83F8zVbEeD45?!C9bS*UicnQRX9n!G@-v]]*aGZi@cp(u5")
@@ -95,7 +95,7 @@ Public Class Form1
                 End If
             End If
         End If
-        If Not password = Nothing Or Not password = "" Then
+        If Not password = Nothing Or Not password = String.Empty Then
             cont = Mid(cont, AES_Encrypt("Encrypted-personal-password", "ppvBR<q3kbb3%~tZ6urN:,4?&5T-9Dffa9#@UEP:D4x5[5NQ9Af)Vr9!2-7a8DXK5Gu4ULS!S.3996/u?f65%&aLcEE?9#.bP>$}M97r46Aw64q52-;)Z22v:s8fHV&n5H{Y6eH3Dnyg9ib8,4!N6C%jc~E59zMQ36Th#VYuRR5Qwt%LN]7N5jefZb9e!L/@sAJ)[=5(@FgVy*^4$p3Az4(zW694z#TM^7$X7u3P63Bm~z)j]@b3q6vB)(yU[j:+").Length + 1)
             cont = AES_Decrypt(cont, "c#k&>*6<r5jGa889]kw4{79_>2gbG5tK]cAM246eVs?7;3Ft]5Di_53" & password & "3dM(3zbYnZ}*jb4Ua>96zH2bHr35j#H?Px$*LF_G9GhDt)TF[*,YMJ!&A;p987BfzE/qM2h779x^7MVpF:sA<J~9ySa;82g3/}WYe3ZM_]e26PP/*f7Wj}-D8x22>qr3n*K<[]42S^875u9K[74r}XG*8KG83F8zVbEeD45?!C9bS*UicnQRX9n!G@-v]]*aGZi@cp(u5")
             If cont = Nothing OrElse Not cont.StartsWith("EManENTNewMailsInformer-configuration file") Then
@@ -152,6 +152,8 @@ er:
 
     Friend Sub RefreshUsers(Optional forceNewThreads As Boolean = True)
         On Error Resume Next
+        DataGridView1.Rows.Clear()
+        SaveUsers()
         If utilisateurs.Count = 0 Then
             Label1.Text = "Veuillez configurer un utilisateur."
             Label1.ForeColor = Color.DarkOrange
@@ -161,8 +163,6 @@ er:
         Label1.Text = "Initialisation en cours..."
         Label1.ForeColor = Color.Blue
         PictureBox1.Image = My.Resources.attente
-        SaveUsers()
-        DataGridView1.Rows.Clear()
         If forceNewThreads Then
             For Each th In utilisateursThreads
                 th.Interrupt()
@@ -174,7 +174,7 @@ er:
             DataGridView1.Rows.Add(New Object() {My.Resources.attente, user.UserName, user.Plateform})
             If forceNewThreads Then
                 Dim th As New Thread(AddressOf RechercheMails)
-                th.Name = user.UserName
+                th.Name = user.UserName + CStr(user.Plateform)
                 th.Start(user)
                 utilisateursThreads.Add(th)
             End If
@@ -226,10 +226,10 @@ er:
         Dim compte As Compte = CType(data, Compte)
         Dim handled As Boolean = False
         Dim waitEvent As New ManualResetEvent(False)
+        Dim directoryContext As String = Path.Combine(Application.StartupPath, compte.UserName + CStr(compte.Plateform) + "-" + New Random().Next(Integer.MaxValue).ToString)
         Try
             Dim news As UShort
             Dim platformeurl As String = urlsplatforms(compte.Plateform)
-            Dim directoryContext As String = Path.Combine(Application.StartupPath, compte.UserName)
             If Not Directory.Exists(directoryContext) Then
                 Directory.CreateDirectory(directoryContext)
             End If
@@ -356,6 +356,10 @@ er:
             If Not browser Is Nothing Then
                 browser.Dispose()
                 utilisateursBrowser.Remove(New UtilisateurBrowser(compte, browser))
+                Try
+                    IO.Directory.Delete(directoryContext, True)
+                Catch ex As Exception
+                End Try
             End If
         End Try
     End Sub
@@ -539,20 +543,20 @@ er:
         On Error Resume Next
         Dim a As New LoginForm1
         If a.ShowDialog() = DialogResult.OK Then
-            Dim t As Thread = findUserThread(a.editedUser.UserName)
+            Dim t As Thread = findUserThread(a.editedUser.UserName, a.editedUser.Plateform)
             t.Interrupt()
             t.Join()
             utilisateursThreads.Remove(t)
             Dim th As New Thread(AddressOf RechercheMails)
-            th.Name = a.editedUser.UserName
+            th.Name = a.editedUser.UserName + CStr(a.editedUser.Plateform)
             th.Start(a.editedUser)
             utilisateursThreads.Add(th)
         End If
 
     End Sub
 
-    Private Function findUserThread(ByVal username As String) As Thread
-        Return utilisateursThreads.Find(Function(x) x.Name = username)
+    Private Function findUserThread(ByVal username As String, ByVal platform As Compte.Plateforme) As Thread
+        Return utilisateursThreads.Find(Function(x) x.Name = username + CStr(platform))
     End Function
 
     Private Sub Panel4_Click(sender As Object, e As EventArgs) Handles Panel4.Click
@@ -573,7 +577,7 @@ er:
                 If Not utilisateursThreads.Exists(Function(x) x.Name = item.UserName And x.IsAlive) Then
                     DataGridView1.Rows(utilisateurs.IndexOf(item)).Cells(0).Value = My.Resources.attente
                     Dim th As New Thread(AddressOf RechercheMails)
-                    th.Name = item.UserName
+                    th.Name = item.UserName + CStr(item.Plateform)
                     th.Start(item)
                     utilisateursThreads.Add(th)
                 End If
@@ -602,12 +606,13 @@ er:
             a.UsernameTextBox.Text = a.user.UserName
             a.ComboBox1.SelectedIndex = CInt(a.user.Plateform)
             If a.ShowDialog() = DialogResult.OK Then
-                Dim t As Thread = findUserThread(a.editedUser.UserName)
+                RefreshUsers(False)
+                Dim t As Thread = findUserThread(a.editedUser.UserName, a.editedUser.Plateform)
                 t.Interrupt()
                 t.Join()
                 utilisateursThreads.Remove(t)
                 Dim th As New Thread(AddressOf RechercheMails)
-                th.Name = a.editedUser.UserName
+                th.Name = a.editedUser.UserName + CStr(a.editedUser.Plateform)
                 th.Start(a.editedUser)
                 utilisateursThreads.Add(th)
             End If
@@ -617,9 +622,17 @@ er:
     Private Sub Panel3_Click(sender As Object, e As EventArgs) Handles Panel3.Click
         On Error Resume Next
         If Not DataGridView1.SelectedRows.Count = 0 Then
-            utilisateurs.RemoveAt(DataGridView1.SelectedRows(0).Cells(0).RowIndex)
-            RefreshUsers()
+            Dim t As Thread = findUserThread(CStr(DataGridView1.SelectedRows(0).Cells(1).Value), CType(DataGridView1.SelectedRows(0).Cells(2).Value, Compte.Plateforme))
+            t.Interrupt()
+            t.Join()
+            utilisateursThreads.Remove(t)
+            removeUser(CStr(DataGridView1.SelectedRows(0).Cells(1).Value), CType(DataGridView1.SelectedRows(0).Cells(2).Value, Compte.Plateforme))
+            RefreshUsers(False)
         End If
+    End Sub
+
+    Private Sub removeUser(ByVal userName As String, ByVal platform As Compte.Plateforme)
+        utilisateurs.RemoveAll(Function(x) x.UserName = userName And x.Plateform = platform)
     End Sub
 
     Private Sub CheckBox1_CheckedChanged(sender As Object, e As EventArgs) Handles CheckBox1.CheckedChanged
