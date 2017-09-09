@@ -191,7 +191,7 @@ er:
                     Exit Select
                 Case Retour.CONNECTED
                     DataGridView1.Rows.Add(New Object() {My.Resources.validé, user.UserName, user.Plateform})
-                    DataGridView1.Rows(DataGridView1.RowCount - 1).Cells(0).ToolTipText = "Recherche des nouveaux mails..."
+                    DataGridView1.Rows(DataGridView1.RowCount - 1).Cells(0).ToolTipText = "Recherche des nouveaux messages..."
                     Exit Select
                 Case Retour.NEW_MAILS
                     DataGridView1.Rows.Add(New Object() {My.Resources.newemail, user.UserName, user.Plateform})
@@ -652,6 +652,14 @@ er:
             a.UsernameTextBox.Text = a.user.UserName
             a.ComboBox1.SelectedIndex = CInt(a.user.Plateform)
             If a.ShowDialog() = DialogResult.OK Then
+                If utilisateurs.Count = 1 Then
+                    Label1.Text = "Initialisation en cours..."
+                Else
+                    Label1.Text = "Initialisation de certains comptes en cours..."
+                End If
+                Label1.ForeColor = Color.Blue
+                PictureBox1.Image = My.Resources.attente
+                a.editedUser.Etat = Retour.INITIALIZATION
                 RefreshUsers(False)
                 Dim t As Thread = findUserThread(a.editedUser.UserName, a.editedUser.Plateform)
                 t.Interrupt()
@@ -660,7 +668,6 @@ er:
                 Dim th As New Thread(AddressOf RechercheMails)
                 th.Name = a.editedUser.UserName + CStr(a.editedUser.Plateform)
                 th.Start(a.editedUser)
-                a.editedUser.Etat = Retour.INITIALIZATION
                 utilisateursThreads.Add(th)
             End If
         End If

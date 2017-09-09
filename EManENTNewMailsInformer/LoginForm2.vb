@@ -38,11 +38,16 @@
     End Sub
 
     Private Sub UsernameTextBox_TextChanged(sender As Object, e As EventArgs) Handles UsernameTextBox.TextChanged
-        For i = 1 To Len(UsernameTextBox.Text)
-            If "<>:""/\|?*".Contains(UsernameTextBox.Text(i)) Then
-                UsernameTextBox.Text = Mid(UsernameTextBox.Text, 1, i - 1) & Mid(UsernameTextBox.Text, i + 1)
-                MsgBox("Vous avez tapé un caractère incorrect. Le nom d'utilisateur ne peut pas contenir les caractères <>:""/\|?*", MsgBoxStyle.Critical, "Erreur")
+        Dim forbiddenChars As Char() = "<>:""/\|?*".ToCharArray()
+        Dim invalidInput As Boolean = False
+        For Each ch In forbiddenChars
+            If UsernameTextBox.Text.Contains(ch) Then
+                UsernameTextBox.Text = UsernameTextBox.Text.Replace(ch, String.Empty)
+                invalidInput = True
             End If
-        Next i
+        Next
+        If invalidInput Then
+            MsgBox("Vous avez tapé un caractère incorrect. Le nom d'utilisateur ne peut pas contenir les caractères <>:""/\|?*", MsgBoxStyle.Critical, "Erreur")
+        End If
     End Sub
 End Class
