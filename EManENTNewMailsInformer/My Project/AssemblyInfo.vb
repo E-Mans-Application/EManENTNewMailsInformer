@@ -12,7 +12,7 @@ Imports System.Runtime.InteropServices
 <Assembly: AssemblyDescription("")>
 <Assembly: AssemblyCompany("E__Man's Application")>
 <Assembly: AssemblyProduct("EManENTNewMailsInformer")>
-<Assembly: AssemblyCopyright("GNU LESSER GENERAL PUBLIC LICENSE Version 3")>
+<Assembly: AssemblyCopyright("Licence publique générale GNU version 3")>
 <Assembly: AssemblyTrademark("")>
 
 <Assembly: ComVisible(False)>
