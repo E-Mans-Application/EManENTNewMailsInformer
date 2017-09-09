@@ -4,4 +4,4 @@ Vous pouvez télécharger le code source et compiler le programme avec Visual St
 
 You can download the source code and generate the program with Visual Studio, but the executable is not directly given here.
 # You may download EManENTNewMailsInformer at the address https://emansapplication.000webhostapp.com/EManENTNewMailsInformer/. (Password: *EENMI-4iS64zvT4H*)
-### Please contact E__Man's Application (emansassociation@gmail.com) if some files doesn't seem to be up-to-date.
+### Please contact E__Man's Application (emansassociation@gmail.com) if some files don't seem to be up-to-date.
