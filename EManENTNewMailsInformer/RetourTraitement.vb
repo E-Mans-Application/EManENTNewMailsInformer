@@ -6,6 +6,8 @@
     CONNECTED
     INTERRUPTED
     END_OF_THREAD
+    NEW_MAILS
+    INITIALIZATION
 End Enum
 
 Friend Class RetourTraitement

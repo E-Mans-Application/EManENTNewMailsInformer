@@ -21,6 +21,7 @@ Public Class Form1
     Friend utilisateursBrowser As New List(Of UtilisateurBrowser)
     Friend retoursThread As New Thread(AddressOf GererRetours)
     Friend retours As New List(Of RetourTraitement)
+    Friend directoriesToDelete As New List(Of String)
     Private quitting As Boolean
     Friend password As String = Nothing
 
@@ -160,10 +161,10 @@ er:
             PictureBox1.Image = My.Resources.male_user_warning_256
             Exit Sub
         End If
-        Label1.Text = "Initialisation en cours..."
-        Label1.ForeColor = Color.Blue
-        PictureBox1.Image = My.Resources.attente
         If forceNewThreads Then
+            Label1.Text = "Initialisation en cours..."
+            Label1.ForeColor = Color.Blue
+            PictureBox1.Image = My.Resources.attente
             For Each th In utilisateursThreads
                 th.Interrupt()
                 th.Join()
@@ -171,19 +172,55 @@ er:
             utilisateursThreads.Clear()
         End If
         For Each user In utilisateurs
-            DataGridView1.Rows.Add(New Object() {My.Resources.attente, user.UserName, user.Plateform})
-            If forceNewThreads Then
+            If (Not doesUserThreadExist(user.UserName, user.Plateform) And user.Etat = Nothing) Or forceNewThreads Then
+                DataGridView1.Rows.Add(New Object() {My.Resources.attente, user.UserName, user.Plateform})
                 Dim th As New Thread(AddressOf RechercheMails)
                 th.Name = user.UserName + CStr(user.Plateform)
                 th.Start(user)
+                user.Etat = Retour.INITIALIZATION
                 utilisateursThreads.Add(th)
+                Continue For
             End If
+            Select Case user.Etat
+                Case Retour.INITIALIZATION
+                    DataGridView1.Rows.Add(New Object() {My.Resources.attente, user.UserName, user.Plateform})
+                    Exit Select
+                Case Retour.BAD_CREDENTIALS
+                    DataGridView1.Rows.Add(New Object() {My.Resources.erreur_icone_4913_128, user.UserName, user.Plateform})
+                    DataGridView1.Rows(DataGridView1.RowCount - 1).Cells(0).ToolTipText = "Identifiants incorrects"
+                    Exit Select
+                Case Retour.CONNECTED
+                    DataGridView1.Rows.Add(New Object() {My.Resources.validé, user.UserName, user.Plateform})
+                    DataGridView1.Rows(DataGridView1.RowCount - 1).Cells(0).ToolTipText = "Recherche des nouveaux mails..."
+                    Exit Select
+                Case Retour.NEW_MAILS
+                    DataGridView1.Rows.Add(New Object() {My.Resources.newemail, user.UserName, user.Plateform})
+                    DataGridView1.Rows(DataGridView1.RowCount - 1).Cells(0).ToolTipText = "Nouveaux messages !"
+                    Exit Select
+                Case Retour.CONNECTION_FAILED
+                    DataGridView1.Rows.Add(New Object() {My.Resources.erreur_icone_4913_128, user.UserName, user.Plateform})
+                    DataGridView1.Rows(DataGridView1.RowCount - 1).Cells(0).ToolTipText = "Echec de la connnexion"
+                    Exit Select
+                Case Retour.END_OF_THREAD, Retour.INTERRUPTED
+                    DataGridView1.Rows.Add(New Object() {My.Resources.erreur_icone_4913_128, user.UserName, user.Plateform})
+                    DataGridView1.Rows(DataGridView1.RowCount - 1).Cells(0).ToolTipText = "Recherche interrompue"
+                    Exit Select
+                Case Retour.SERVICE_UNAVAILABLE
+                    DataGridView1.Rows.Add(New Object() {My.Resources.erreur_icone_4913_128, user.UserName, user.Plateform})
+                    DataGridView1.Rows(DataGridView1.RowCount - 1).Cells(0).ToolTipText = "ENT indisponible"
+                    Exit Select
+                Case Retour.UNEXPECTED_ERROR
+                    DataGridView1.Rows.Add(New Object() {My.Resources.erreur_icone_4913_128, user.UserName, user.Plateform})
+                    DataGridView1.Rows(DataGridView1.RowCount - 1).Cells(0).ToolTipText = "Erreur inattendue"
+                    Exit Select
+            End Select
         Next
     End Sub
 
     Private Sub NewMails(ByVal sender As Compte, ByVal count As UShort)
         If count > 0 Then
             Me.Invoke(Sub()
+                          sender.Etat = Retour.NEW_MAILS
                           DataGridView1.Rows(utilisateurs.IndexOf(sender)).Cells(0).Value = My.Resources.nouveauxmessages
                           DataGridView1.Rows(utilisateurs.IndexOf(sender)).Cells(0).ToolTipText = "Nouveaux messages !"
                           If UtilisateursRecherche.Count = utilisateurs.Count Then
@@ -360,6 +397,7 @@ er:
                 Try
                     IO.Directory.Delete(directoryContext, True)
                 Catch ex As Exception
+                    directoriesToDelete.Add(directoryContext)
                 End Try
             End If
         End Try
@@ -421,6 +459,7 @@ er:
             While Not retours.Count = 0
                 Dim retou = retours(0)
                 retours.RemoveAt(0)
+                retou.Utilisateur.Etat = retou.Reponse
                 If retou.Reponse = Retour.UNEXPECTED_ERROR Then
                     UtilisateursRecherche.Remove(retou.Utilisateur)
                     RemoveHandler retou.Utilisateur.NewMails, AddressOf NewMails
@@ -488,7 +527,7 @@ er:
                     RemoveHandler retou.Utilisateur.NewMails, AddressOf NewMails
                     Me.Invoke(Sub()
                                   DataGridView1.Rows(utilisateurs.IndexOf(retou.Utilisateur)).Cells(0).Value = My.Resources.erreur_icone_4913_128
-                                  DataGridView1.Rows(utilisateurs.IndexOf(retou.Utilisateur)).Cells(0).ToolTipText = "Identifiants incorrects"
+                                  DataGridView1.Rows(utilisateurs.IndexOf(retou.Utilisateur)).Cells(0).ToolTipText = "ENT indisponible"
                                   If utilisateursThreads.Count > 0 Then
                                       Label1.Text = "ENT indisponible pour certains utilisateurs."
                                       Label1.ForeColor = Color.OrangeRed
@@ -509,18 +548,18 @@ er:
                     Me.Invoke(Sub()
                                   DataGridView1.Rows(utilisateurs.IndexOf(retou.Utilisateur)).Cells(0).Value = My.Resources.erreur_icone_4913_128
                                   DataGridView1.Rows(utilisateurs.IndexOf(retou.Utilisateur)).Cells(0).ToolTipText = "Recherche interrompue"
-                                      If utilisateursThreads.Count > 0 Then
-                                          Label1.Text = "Recherche interrompue pour certains utilisateurs."
-                                          Label1.ForeColor = Color.OrangeRed
-                                          PictureBox1.Image = My.Resources.avertissement_icone_9768_128
-                                      Else
-                                          Label1.Text = "Recherche interrompue."
-                                          Label1.ForeColor = Color.DarkRed
-                                          PictureBox1.Image = My.Resources.erreur_icone_4913_128
-                                      End If
-                                      Dim a As New Dialog7
-                                      a.Label3.Text &= retou.Utilisateur.UserName
-                                      a.ShowDialog()
+                                  If utilisateursThreads.Count > 0 Then
+                                      Label1.Text = "Recherche interrompue pour certains utilisateurs."
+                                      Label1.ForeColor = Color.OrangeRed
+                                      PictureBox1.Image = My.Resources.avertissement_icone_9768_128
+                                  Else
+                                      Label1.Text = "Recherche interrompue."
+                                      Label1.ForeColor = Color.DarkRed
+                                      PictureBox1.Image = My.Resources.erreur_icone_4913_128
+                                  End If
+                                  Dim a As New Dialog7
+                                  a.Label3.Text &= retou.Utilisateur.UserName
+                                  a.ShowDialog()
                                   a.BringToFront()
                               End Sub)
                 ElseIf retou.Reponse = Retour.CONNECTED Then
@@ -551,10 +590,14 @@ er:
             Dim th As New Thread(AddressOf RechercheMails)
             th.Name = a.editedUser.UserName + CStr(a.editedUser.Plateform)
             th.Start(a.editedUser)
+            a.editedUser.Etat = Retour.INITIALIZATION
             utilisateursThreads.Add(th)
         End If
 
     End Sub
+    Private Function doesUserThreadExist(ByVal username As String, ByVal platform As Compte.Plateforme) As Boolean
+        Return utilisateursThreads.Exists(Function(x) x.Name = username + CStr(platform))
+    End Function
 
     Private Function findUserThread(ByVal username As String, ByVal platform As Compte.Plateforme) As Thread
         Return utilisateursThreads.Find(Function(x) x.Name = username + CStr(platform))
@@ -571,15 +614,17 @@ er:
             If UtilisateursRecherche.Count = utilisateurs.Count Then
                 Exit Sub
             End If
-            Label1.Text = "Initialisation de certains comptes en cours..."
-            Label1.ForeColor = Color.Blue
-            PictureBox1.Image = My.Resources.attente
             For Each item In utilisateurs
-                If Not utilisateursThreads.Exists(Function(x) x.Name = item.UserName And x.IsAlive) Then
+                If Not doesUserThreadExist(item.UserName, item.Plateform) Then
+                    Label1.Text = "Initialisation de certains comptes en cours..."
+                    Label1.ForeColor = Color.Blue
+                    PictureBox1.Image = My.Resources.attente
                     DataGridView1.Rows(utilisateurs.IndexOf(item)).Cells(0).Value = My.Resources.attente
+                    DataGridView1.Rows(utilisateurs.IndexOf(item)).Cells(0).ToolTipText = Nothing
                     Dim th As New Thread(AddressOf RechercheMails)
                     th.Name = item.UserName + CStr(item.Plateform)
                     th.Start(item)
+                    item.Etat = Retour.INITIALIZATION
                     utilisateursThreads.Add(th)
                 End If
             Next
@@ -615,6 +660,7 @@ er:
                 Dim th As New Thread(AddressOf RechercheMails)
                 th.Name = a.editedUser.UserName + CStr(a.editedUser.Plateform)
                 th.Start(a.editedUser)
+                a.editedUser.Etat = Retour.INITIALIZATION
                 utilisateursThreads.Add(th)
             End If
         End If
@@ -684,6 +730,14 @@ er:
             utilisateursThreads(0).Interrupt()
             utilisateursThreads(0).Join()
         End While
+        For Each directory In directoriesToDelete
+            If IO.Directory.Exists(directory) Then
+                On Error Resume Next
+                IO.Directory.Delete(directory, True)
+                On Error GoTo er
+            End If
+        Next
+        directoriesToDelete.Clear()
         Application.Exit()
 er:
         End

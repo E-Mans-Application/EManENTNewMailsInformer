@@ -3,6 +3,7 @@
     Private user As String = Nothing
     Private pass As String = Nothing
     Private plate As Plateforme = Nothing
+    Private et As Retour = Retour.INITIALIZATION
 
     Public Enum Plateforme
         Agora06
@@ -55,6 +56,15 @@
     Public Overrides Function ToString() As String
         Return "Compte{" & Me.UserName & ";" & Me.Password & ";" & Me.Plateform & "}"
     End Function
+
+    Friend Property Etat As Retour
+        Get
+            Return et
+        End Get
+        Set(value As Retour)
+            et = value
+        End Set
+    End Property
 
     Public Shared Function Join(CompteString As String) As Compte
         If Not CompteString.StartsWith("Compte{") Or Not CompteString.EndsWith("}") Then
