@@ -275,7 +275,7 @@ er:
             s.Click()
             Do
                 Thread.Sleep(1000)
-            Loop While browser.Loading And Not quitting
+            Loop While (browser.Loading Or browser.URL = "https://www.atrium-paca.fr/") And Not quitting
             If quitting Then
                 Exit Sub
             End If
@@ -307,7 +307,8 @@ er:
                     handled = True
                     Exit Sub
                 End If
-                If browser.GetDocument().GetElementById("_145_navAccountControls") Is Nothing Then
+                If browser.GetDocument().GetElementById("_145_navAccountControls") Is Nothing Or
+                     browser.GetDocument().GetElementsByClassName("icon-envelope icon-atrium-mega").Count = 0 Then
                     retours.Add(New RetourTraitement(compte, Retour.UNEXPECTED_ERROR))
                     handled = True
                     Exit Sub
@@ -425,13 +426,13 @@ er:
                     RemoveHandler retou.Utilisateur.NewMails, AddressOf NewMails
                     Me.Invoke(Sub()
                                   DataGridView1.Rows(utilisateurs.IndexOf(retou.Utilisateur)).Cells(0).Value = My.Resources.erreur_icone_4913_128
-                                  DataGridView1.Rows(utilisateurs.IndexOf(retou.Utilisateur)).Cells(0).ToolTipText = "Erreur innatendue"
+                                  DataGridView1.Rows(utilisateurs.IndexOf(retou.Utilisateur)).Cells(0).ToolTipText = "Erreur inattendue"
                                   If utilisateursThreads.Count > 0 Then
-                                      Label1.Text = "Erreur innatendue pour certains utlisateurs."
+                                      Label1.Text = "Erreur inattendue pour certains utlisateurs."
                                       Label1.ForeColor = Color.OrangeRed
                                       PictureBox1.Image = My.Resources.avertissement_icone_9768_128
                                   Else
-                                      Label1.Text = "Erreur innatendue."
+                                      Label1.Text = "Erreur inattendue."
                                       Label1.ForeColor = Color.DarkRed
                                       PictureBox1.Image = My.Resources.erreur_icone_4913_128
                                   End If
