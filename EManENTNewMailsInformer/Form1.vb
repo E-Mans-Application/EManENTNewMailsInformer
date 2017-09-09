@@ -93,12 +93,10 @@ Public Class Form1
                     Quit()
                 End If
             End If
-        End If
-        If Not password = Nothing Or Not password = String.Empty Then
             cont = Mid(cont, AES_Encrypt("Encrypted-personal-password", "ppvBR<q3kbb3%~tZ6urN:,4?&5T-9Dffa9#@UEP:D4x5[5NQ9Af)Vr9!2-7a8DXK5Gu4ULS!S.3996/u?f65%&aLcEE?9#.bP>$}M97r46Aw64q52-;)Z22v:s8fHV&n5H{Y6eH3Dnyg9ib8,4!N6C%jc~E59zMQ36Th#VYuRR5Qwt%LN]7N5jefZb9e!L/@sAJ)[=5(@FgVy*^4$p3Az4(zW694z#TM^7$X7u3P63Bm~z)j]@b3q6vB)(yU[j:+").Length + 1)
             cont = AES_Decrypt(cont, "c#k&>*6<r5jGa889]kw4{79_>2gbG5tK]cAM246eVs?7;3Ft]5Di_53" & password & "3dM(3zbYnZ}*jb4Ua>96zH2bHr35j#H?Px$*LF_G9GhDt)TF[*,YMJ!&A;p987BfzE/qM2h779x^7MVpF:sA<J~9ySa;82g3/}WYe3ZM_]e26PP/*f7Wj}-D8x22>qr3n*K<[]42S^875u9K[74r}XG*8KG83F8zVbEeD45?!C9bS*UicnQRX9n!G@-v]]*aGZi@cp(u5")
             If cont = Nothing OrElse Not cont.StartsWith("EManENTNewMailsInformer-configuration file") Then
-                MsgBox("Le mot de passe est incorrect. Veuillez réessayer.", MsgBoxStyle.Critical, "Mot Decimal passe incorrect.")
+                MsgBox("Le mot de passe est incorrect. Veuillez réessayer.", MsgBoxStyle.Critical, "Mot de passe incorrect.")
                 LoadUsers(askPassword:=True)
                 Exit Sub
             End If
