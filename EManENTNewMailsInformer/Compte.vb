@@ -1,4 +1,17 @@
-﻿Public Class Compte
+﻿
+Public Enum Retour
+    CONNECTION_FAILED
+    BAD_CREDENTIALS
+    UNEXPECTED_ERROR
+    SERVICE_UNAVAILABLE
+    CONNECTED
+    INTERRUPTED
+    END_OF_THREAD
+    NEW_MAILS
+    INITIALIZATION
+End Enum
+
+Public Class Compte
 
     Private user As String = Nothing
     Private pass As String = Nothing
@@ -15,6 +28,7 @@
     End Sub
 
     Public Event NewMails(ByVal sender As Compte, ByVal mailCount As UShort)
+    Public Event StateChanged(ByVal sender As Compte, ByVal newState As Retour)
 
     Public Sub ReceiveMails(count As UShort)
         RaiseEvent NewMails(Me, count)
@@ -57,12 +71,13 @@
         Return "Compte{" & Me.UserName & ";" & Me.Password & ";" & Me.Plateform & "}"
     End Function
 
-    Friend Property Etat As Retour
+    Public Property Etat As Retour
         Get
             Return et
         End Get
         Set(value As Retour)
             et = value
+            RaiseEvent StateChanged(Me, value)
         End Set
     End Property
 

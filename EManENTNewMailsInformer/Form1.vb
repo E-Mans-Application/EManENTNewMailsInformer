@@ -18,9 +18,7 @@ Public Class Form1
     Friend ReadOnly urlsplatforms As String() = {"https://www.agora06.fr/", "https://www.atrium-paca.fr/", "https://ent.enteduc.fr/"}
     Friend UtilisateursRecherche As New List(Of Compte)
     Friend utilisateursThreads As New List(Of Thread)
-    Friend utilisateursBrowser As New List(Of UtilisateurBrowser)
-    Friend retoursThread As New Thread(AddressOf GererRetours)
-    Friend retours As New List(Of RetourTraitement)
+    Friend utilisateursBrowsers As New List(Of UtilisateurBrowser)
     Friend directoriesToDelete As New List(Of String)
     Private quitting As Boolean
     Friend password As String = Nothing
@@ -117,7 +115,6 @@ Public Class Form1
         RefreshUsers()
         If onStartup Then
             CheckStartup()
-            retoursThread.Start()
         End If
         Exit Sub
 er:
@@ -172,6 +169,7 @@ er:
             utilisateursThreads.Clear()
         End If
         For Each user In utilisateurs
+            AddHandler user.StateChanged, AddressOf GererRetours
             If (Not doesUserThreadExist(user.UserName, user.Plateform) And user.Etat = Nothing) Or forceNewThreads Then
                 DataGridView1.Rows.Add(New Object() {My.Resources.attente, user.UserName, user.Plateform})
                 Dim th As New Thread(AddressOf RechercheMails)
@@ -248,14 +246,14 @@ er:
     End Sub
 
     Friend Function doesBrowserExist(ByVal compte As Compte) As Boolean
-        Return utilisateursBrowser.Exists(Function(x) x.Utilisateur Is compte)
+        Return utilisateursBrowsers.Exists(Function(x) x.Utilisateur Is compte)
     End Function
 
     Friend Function getBrowser(ByVal compte As Compte) As Browser
-        Return utilisateursBrowser.Find(Function(x) x.Utilisateur Is compte).Browser
+        Return utilisateursBrowsers.Find(Function(x) x.Utilisateur Is compte).Browser
     End Function
     Friend Function getUtilisateurBrowser(ByVal compte As Compte) As UtilisateurBrowser
-        Return utilisateursBrowser.Find(Function(x) x.Utilisateur Is compte)
+        Return utilisateursBrowsers.Find(Function(x) x.Utilisateur Is compte)
     End Function
 
     Friend Sub RechercheMails(data As Object)
@@ -272,10 +270,10 @@ er:
             End If
             If doesBrowserExist(compte) Then
                 getBrowser(compte).Dispose()
-                utilisateursBrowser.Remove(getUtilisateurBrowser(compte))
+                utilisateursBrowsers.Remove(getUtilisateurBrowser(compte))
             End If
             browser = BrowserFactory.Create(New BrowserContext(New BrowserContextParams(directoryContext)))
-            utilisateursBrowser.Add(New UtilisateurBrowser(compte, browser))
+            utilisateursBrowsers.Add(New UtilisateurBrowser(compte, browser))
             AddHandler browser.FinishLoadingFrameEvent, Sub(sender, e)
                                                             If (e.IsMainFrame) Then
                                                                 waitEvent.Set()
@@ -303,7 +301,7 @@ er:
                 Next
             End If
             If u Is Nothing Or p Is Nothing Or s Is Nothing Then
-                retours.Add(New RetourTraitement(compte, Retour.CONNECTION_FAILED))
+                compte.Etat = Retour.CONNECTION_FAILED
                 handled = True
                 Exit Sub
             End If
@@ -318,39 +316,39 @@ er:
             End If
             If platformeurl.Contains("agora06") Or platformeurl.Contains("enteduc") Then
                 If browser.GetDocument().GetElementById("credentials_table_postheader").GetElementsByTagName("font").Count > 0 Then
-                    retours.Add(New RetourTraitement(compte, Retour.BAD_CREDENTIALS))
+                    compte.Etat = Retour.BAD_CREDENTIALS
                     handled = True
                     Exit Sub
                 End If
                 Dim n As DOM.DOMElement = browser.GetDocument().GetElementById("Ident_MailsUtilisateur")
                 If n Is Nothing Then
-                    retours.Add(New RetourTraitement(compte, Retour.UNEXPECTED_ERROR))
+                    compte.Etat = Retour.UNEXPECTED_ERROR
                     handled = True
                     Exit Sub
                 End If
-                retours.Add(New RetourTraitement(compte, Retour.CONNECTED))
+                compte.Etat = Retour.CONNECTED
                 If CUShort(n.TextContent) > news Then
                     compte.ReceiveMails(CUShort(n.TextContent))
                 End If
                 news = CUShort(n.TextContent)
             ElseIf platformeurl.Contains("atrium") Then
                 If browser.URL.ToString.Contains("?connection-state=bad-credentials") Or browser.URL.ToString.Contains("/undefined") Then
-                    retours.Add(New RetourTraitement(compte, Retour.BAD_CREDENTIALS))
+                    compte.Etat = Retour.BAD_CREDENTIALS
                     handled = True
                     Exit Sub
                 End If
                 If browser.URL.ToString.Contains("?connection-state=closed-service") Then
-                    retours.Add(New RetourTraitement(compte, Retour.SERVICE_UNAVAILABLE))
+                    compte.Etat = Retour.SERVICE_UNAVAILABLE
                     handled = True
                     Exit Sub
                 End If
                 If browser.GetDocument().GetElementById("_145_navAccountControls") Is Nothing Or
                      browser.GetDocument().GetElementsByClassName("icon-envelope icon-atrium-mega").Count = 0 Then
-                    retours.Add(New RetourTraitement(compte, Retour.UNEXPECTED_ERROR))
+                    compte.Etat = Retour.UNEXPECTED_ERROR
                     handled = True
                     Exit Sub
                 End If
-                retours.Add(New RetourTraitement(compte, Retour.CONNECTED))
+                compte.Etat = Retour.CONNECTED
                 Dim m As DOM.DOMNode = Nothing
                 Dim slist As List(Of DOM.DOMNode) = browser.GetDocument().GetElementById("_145_navAccountControls").GetElementsByClassName("badge badge-notify")
                 If Not slist.Count = 0 Then
@@ -380,20 +378,20 @@ er:
                 news = nm
             End While
         Catch ex As ThreadInterruptedException
-            retours.Add(New RetourTraitement(compte, Retour.INTERRUPTED))
+            compte.Etat = Retour.INTERRUPTED
             handled = True
         Catch ex As Exception
-            retours.Add(New RetourTraitement(compte, Retour.UNEXPECTED_ERROR))
+            compte.Etat = Retour.UNEXPECTED_ERROR
             handled = True
         Finally
             UtilisateursRecherche.Remove(compte)
             utilisateursThreads.Remove(Thread.CurrentThread)
             If Not handled Then
-                retours.Add(New RetourTraitement(compte, Retour.END_OF_THREAD))
+                compte.Etat = Retour.END_OF_THREAD
             End If
             If Not browser Is Nothing Then
                 browser.Dispose()
-                utilisateursBrowser.Remove(New UtilisateurBrowser(compte, browser))
+                utilisateursBrowsers.Remove(New UtilisateurBrowser(compte, browser))
                 Try
                     IO.Directory.Delete(directoryContext, True)
                 Catch ex As Exception
@@ -416,27 +414,28 @@ er:
         Dim platformeurl As String = urlsplatforms(utilisateur.Plateform)
         If platformeurl.Contains("agora06") Or platformeurl.Contains("enteduc") Then
             If browser.GetDocument().GetElementById("credentials_table_postheader").GetElementsByTagName("font").Count > 0 Then
-                retours.Add(New RetourTraitement(utilisateur, Retour.BAD_CREDENTIALS))
+                utilisateur.Etat = Retour.BAD_CREDENTIALS
                 Throw New HandledException
             End If
             Dim n As DOM.DOMElement = browser.GetDocument().GetElementById("Ident_MailsUtilisateur")
             If n Is Nothing Then
-                retours.Add(New RetourTraitement(utilisateur, Retour.UNEXPECTED_ERROR))
+                utilisateur.Etat = Retour.UNEXPECTED_ERROR
                 Throw New HandledException
             End If
             Return CUShort(n.TextContent)
         ElseIf platformeurl.Contains("atrium") Then
             If browser.URL.ToString.Contains("?connection-state=bad-credentials") Or browser.URL.ToString.Contains("/undefined") Then
                 MsgBox(browser.URL)
-                retours.Add(New RetourTraitement(utilisateur, Retour.BAD_CREDENTIALS))
+                utilisateur.Etat = Retour.BAD_CREDENTIALS
                 Throw New HandledException
             End If
             If browser.URL.ToString.Contains("?connection-state=closed-service") Then
-                retours.Add(New RetourTraitement(utilisateur, Retour.SERVICE_UNAVAILABLE))
+                utilisateur.Etat = Retour.SERVICE_UNAVAILABLE
                 Throw New HandledException
             End If
-            If browser.GetDocument().GetElementById("_145_navAccountControls") Is Nothing Then
-                retours.Add(New RetourTraitement(utilisateur, Retour.UNEXPECTED_ERROR))
+            If browser.GetDocument().GetElementById("_145_navAccountControls") Is Nothing Or
+                 browser.GetDocument().GetElementsByClassName("icon-envelope icon-atrium-mega").Count = 0 Then
+                utilisateur.Etat = Retour.UNEXPECTED_ERROR
                 Throw New HandledException
             End If
             Dim slist As List(Of DOM.DOMNode) = browser.GetDocument().GetElementById("_145_navAccountControls").GetElementsByClassName("badge badge-notify")
@@ -454,129 +453,122 @@ er:
         Return 0US
     End Function
 
-    Private Sub GererRetours(e As Object)
-        While Not quitting
-            While Not retours.Count = 0
-                Dim retou = retours(0)
-                retours.RemoveAt(0)
-                retou.Utilisateur.Etat = retou.Reponse
-                If retou.Reponse = Retour.UNEXPECTED_ERROR Then
-                    UtilisateursRecherche.Remove(retou.Utilisateur)
-                    RemoveHandler retou.Utilisateur.NewMails, AddressOf NewMails
-                    Me.Invoke(Sub()
-                                  DataGridView1.Rows(utilisateurs.IndexOf(retou.Utilisateur)).Cells(0).Value = My.Resources.erreur_icone_4913_128
-                                  DataGridView1.Rows(utilisateurs.IndexOf(retou.Utilisateur)).Cells(0).ToolTipText = "Erreur inattendue"
-                                  If utilisateursThreads.Count > 0 Then
-                                      Label1.Text = "Erreur inattendue pour certains utlisateurs."
-                                      Label1.ForeColor = Color.OrangeRed
-                                      PictureBox1.Image = My.Resources.avertissement_icone_9768_128
-                                  Else
-                                      Label1.Text = "Erreur inattendue."
-                                      Label1.ForeColor = Color.DarkRed
-                                      PictureBox1.Image = My.Resources.erreur_icone_4913_128
-                                  End If
-                                  Dim a As New Dialog3
-                                  a.Label3.Text &= retou.Utilisateur.UserName
-                                  a.ShowDialog()
-                                  a.BringToFront()
-                              End Sub)
+    Private Sub GererRetours(sender As Compte, newState As Retour)
+        If newState = Retour.UNEXPECTED_ERROR Then
+            UtilisateursRecherche.Remove(sender)
+            RemoveHandler sender.NewMails, AddressOf NewMails
+            Me.Invoke(Sub()
+                          DataGridView1.Rows(utilisateurs.IndexOf(sender)).Cells(0).Value = My.Resources.erreur_icone_4913_128
+                          DataGridView1.Rows(utilisateurs.IndexOf(sender)).Cells(0).ToolTipText = "Erreur inattendue"
+                          If utilisateursThreads.Count > 0 Then
+                              Label1.Text = "Erreur inattendue pour certains utlisateurs."
+                              Label1.ForeColor = Color.OrangeRed
+                              PictureBox1.Image = My.Resources.avertissement_icone_9768_128
+                          Else
+                              Label1.Text = "Erreur inattendue."
+                              Label1.ForeColor = Color.DarkRed
+                              PictureBox1.Image = My.Resources.erreur_icone_4913_128
+                          End If
+                          Dim a As New Dialog3
+                          a.Label3.Text &= sender.UserName
+                          a.ShowDialog()
+                          a.BringToFront()
+                      End Sub)
 
-                ElseIf retou.Reponse = Retour.CONNECTION_FAILED Then
-                    UtilisateursRecherche.Remove(retou.Utilisateur)
-                    RemoveHandler retou.Utilisateur.NewMails, AddressOf NewMails
-                    Me.Invoke(Sub()
-                                  DataGridView1.Rows(utilisateurs.IndexOf(retou.Utilisateur)).Cells(0).Value = My.Resources.erreur_icone_4913_128
-                                  DataGridView1.Rows(utilisateurs.IndexOf(retou.Utilisateur)).Cells(0).ToolTipText = "Echec de la connexion"
-                                  If utilisateursThreads.Count > 0 Then
-                                      Label1.Text = "Echec de la connexion pour certains utlisateurs."
-                                      Label1.ForeColor = Color.OrangeRed
-                                      PictureBox1.Image = My.Resources.avertissement_icone_9768_128
-                                  Else
-                                      Label1.Text = "Echec de la connexion."
-                                      Label1.ForeColor = Color.DarkRed
-                                      PictureBox1.Image = My.Resources.erreur_icone_4913_128
-                                  End If
-                                  Dim a As New Dialog1
-                                  a.Label3.Text &= retou.Utilisateur.UserName
-                                  a.ShowDialog()
-                                  a.BringToFront()
-                              End Sub)
+        ElseIf newState = Retour.CONNECTION_FAILED Then
+            UtilisateursRecherche.Remove(sender)
+            RemoveHandler sender.NewMails, AddressOf NewMails
+            Me.Invoke(Sub()
+                          DataGridView1.Rows(utilisateurs.IndexOf(sender)).Cells(0).Value = My.Resources.erreur_icone_4913_128
+                          DataGridView1.Rows(utilisateurs.IndexOf(sender)).Cells(0).ToolTipText = "Echec de la connexion"
+                          If utilisateursThreads.Count > 0 Then
+                              Label1.Text = "Echec de la connexion pour certains utlisateurs."
+                              Label1.ForeColor = Color.OrangeRed
+                              PictureBox1.Image = My.Resources.avertissement_icone_9768_128
+                          Else
+                              Label1.Text = "Echec de la connexion."
+                              Label1.ForeColor = Color.DarkRed
+                              PictureBox1.Image = My.Resources.erreur_icone_4913_128
+                          End If
+                          Dim a As New Dialog1
+                          a.Label3.Text &= sender.UserName
+                          a.ShowDialog()
+                          a.BringToFront()
+                      End Sub)
 
-                ElseIf retou.Reponse = Retour.BAD_CREDENTIALS Then
-                    UtilisateursRecherche.Remove(retou.Utilisateur)
-                    RemoveHandler retou.Utilisateur.NewMails, AddressOf NewMails
-                    Me.Invoke(Sub()
-                                  DataGridView1.Rows(utilisateurs.IndexOf(retou.Utilisateur)).Cells(0).Value = My.Resources.erreur_icone_4913_128
-                                  DataGridView1.Rows(utilisateurs.IndexOf(retou.Utilisateur)).Cells(0).ToolTipText = "Identifiants incorrects"
-                                  If utilisateursThreads.Count > 0 Then
-                                      Label1.Text = "Identifiants incorrects pour certains utlisateurs."
-                                      Label1.ForeColor = Color.OrangeRed
-                                      PictureBox1.Image = My.Resources.avertissement_icone_9768_128
-                                  Else
-                                      Label1.Text = "Identifiants incorrects."
-                                      Label1.ForeColor = Color.DarkRed
-                                      PictureBox1.Image = My.Resources.erreur_icone_4913_128
-                                  End If
-                                  Dim a As New Dialog2
-                                  a.Label3.Text &= retou.Utilisateur.UserName
-                                  a.ShowDialog()
-                                  a.BringToFront()
-                              End Sub)
-                ElseIf retou.Reponse = Retour.SERVICE_UNAVAILABLE Then
-                    UtilisateursRecherche.Remove(retou.Utilisateur)
-                    RemoveHandler retou.Utilisateur.NewMails, AddressOf NewMails
-                    Me.Invoke(Sub()
-                                  DataGridView1.Rows(utilisateurs.IndexOf(retou.Utilisateur)).Cells(0).Value = My.Resources.erreur_icone_4913_128
-                                  DataGridView1.Rows(utilisateurs.IndexOf(retou.Utilisateur)).Cells(0).ToolTipText = "ENT indisponible"
-                                  If utilisateursThreads.Count > 0 Then
-                                      Label1.Text = "ENT indisponible pour certains utilisateurs."
-                                      Label1.ForeColor = Color.OrangeRed
-                                      PictureBox1.Image = My.Resources.avertissement_icone_9768_128
-                                  Else
-                                      Label1.Text = "ENT indisponible."
-                                      Label1.ForeColor = Color.DarkRed
-                                      PictureBox1.Image = My.Resources.erreur_icone_4913_128
-                                  End If
-                                  Dim a As New Dialog6
-                                  a.Label3.Text &= retou.Utilisateur.UserName
-                                  a.ShowDialog()
-                                  a.BringToFront()
-                              End Sub)
-                ElseIf retou.Reponse = Retour.END_OF_THREAD Then
-                    UtilisateursRecherche.Remove(retou.Utilisateur)
-                    RemoveHandler retou.Utilisateur.NewMails, AddressOf NewMails
-                    Me.Invoke(Sub()
-                                  DataGridView1.Rows(utilisateurs.IndexOf(retou.Utilisateur)).Cells(0).Value = My.Resources.erreur_icone_4913_128
-                                  DataGridView1.Rows(utilisateurs.IndexOf(retou.Utilisateur)).Cells(0).ToolTipText = "Recherche interrompue"
-                                  If utilisateursThreads.Count > 0 Then
-                                      Label1.Text = "Recherche interrompue pour certains utilisateurs."
-                                      Label1.ForeColor = Color.OrangeRed
-                                      PictureBox1.Image = My.Resources.avertissement_icone_9768_128
-                                  Else
-                                      Label1.Text = "Recherche interrompue."
-                                      Label1.ForeColor = Color.DarkRed
-                                      PictureBox1.Image = My.Resources.erreur_icone_4913_128
-                                  End If
-                                  Dim a As New Dialog7
-                                  a.Label3.Text &= retou.Utilisateur.UserName
-                                  a.ShowDialog()
-                                  a.BringToFront()
-                              End Sub)
-                ElseIf retou.Reponse = Retour.CONNECTED Then
-                    UtilisateursRecherche.Add(retou.Utilisateur)
-                    AddHandler retou.Utilisateur.NewMails, AddressOf NewMails
-                    Me.Invoke(Sub()
-                                  DataGridView1.Rows(utilisateurs.IndexOf(retou.Utilisateur)).Cells(0).Value = My.Resources.validé
-                                  DataGridView1.Rows(utilisateurs.IndexOf(retou.Utilisateur)).Cells(0).ToolTipText = "Recherche des nouveaux messages..."
-                                  If UtilisateursRecherche.Count = utilisateurs.Count Then
-                                      Label1.Text = "Recherche des nouveaux messages..."
-                                      Label1.ForeColor = Color.Green
-                                      PictureBox1.Image = My.Resources.validé
-                                  End If
-                              End Sub)
-                End If
-            End While
-        End While
+        ElseIf newState = Retour.BAD_CREDENTIALS Then
+            UtilisateursRecherche.Remove(sender)
+            RemoveHandler sender.NewMails, AddressOf NewMails
+            Me.Invoke(Sub()
+                          DataGridView1.Rows(utilisateurs.IndexOf(sender)).Cells(0).Value = My.Resources.erreur_icone_4913_128
+                          DataGridView1.Rows(utilisateurs.IndexOf(sender)).Cells(0).ToolTipText = "Identifiants incorrects"
+                          If utilisateursThreads.Count > 0 Then
+                              Label1.Text = "Identifiants incorrects pour certains utlisateurs."
+                              Label1.ForeColor = Color.OrangeRed
+                              PictureBox1.Image = My.Resources.avertissement_icone_9768_128
+                          Else
+                              Label1.Text = "Identifiants incorrects."
+                              Label1.ForeColor = Color.DarkRed
+                              PictureBox1.Image = My.Resources.erreur_icone_4913_128
+                          End If
+                          Dim a As New Dialog2
+                          a.Label3.Text &= sender.UserName
+                          a.ShowDialog()
+                          a.BringToFront()
+                      End Sub)
+        ElseIf newState = Retour.SERVICE_UNAVAILABLE Then
+            UtilisateursRecherche.Remove(sender)
+            RemoveHandler sender.NewMails, AddressOf NewMails
+            Me.Invoke(Sub()
+                          DataGridView1.Rows(utilisateurs.IndexOf(sender)).Cells(0).Value = My.Resources.erreur_icone_4913_128
+                          DataGridView1.Rows(utilisateurs.IndexOf(sender)).Cells(0).ToolTipText = "ENT indisponible"
+                          If utilisateursThreads.Count > 0 Then
+                              Label1.Text = "ENT indisponible pour certains utilisateurs."
+                              Label1.ForeColor = Color.OrangeRed
+                              PictureBox1.Image = My.Resources.avertissement_icone_9768_128
+                          Else
+                              Label1.Text = "ENT indisponible."
+                              Label1.ForeColor = Color.DarkRed
+                              PictureBox1.Image = My.Resources.erreur_icone_4913_128
+                          End If
+                          Dim a As New Dialog6
+                          a.Label3.Text &= sender.UserName
+                          a.ShowDialog()
+                          a.BringToFront()
+                      End Sub)
+        ElseIf newState = Retour.END_OF_THREAD Then
+            UtilisateursRecherche.Remove(sender)
+            RemoveHandler sender.NewMails, AddressOf NewMails
+            Me.Invoke(Sub()
+                          DataGridView1.Rows(utilisateurs.IndexOf(sender)).Cells(0).Value = My.Resources.erreur_icone_4913_128
+                          DataGridView1.Rows(utilisateurs.IndexOf(sender)).Cells(0).ToolTipText = "Recherche interrompue"
+                          If utilisateursThreads.Count > 0 Then
+                              Label1.Text = "Recherche interrompue pour certains utilisateurs."
+                              Label1.ForeColor = Color.OrangeRed
+                              PictureBox1.Image = My.Resources.avertissement_icone_9768_128
+                          Else
+                              Label1.Text = "Recherche interrompue."
+                              Label1.ForeColor = Color.DarkRed
+                              PictureBox1.Image = My.Resources.erreur_icone_4913_128
+                          End If
+                          Dim a As New Dialog7
+                          a.Label3.Text &= sender.UserName
+                          a.ShowDialog()
+                          a.BringToFront()
+                      End Sub)
+        ElseIf newState = Retour.CONNECTED Then
+            UtilisateursRecherche.Add(sender)
+            AddHandler sender.NewMails, AddressOf NewMails
+            Me.Invoke(Sub()
+                          DataGridView1.Rows(utilisateurs.IndexOf(sender)).Cells(0).Value = My.Resources.validé
+                          DataGridView1.Rows(utilisateurs.IndexOf(sender)).Cells(0).ToolTipText = "Recherche des nouveaux messages..."
+                          If UtilisateursRecherche.Count = utilisateurs.Count Then
+                              Label1.Text = "Recherche des nouveaux messages..."
+                              Label1.ForeColor = Color.Green
+                              PictureBox1.Image = My.Resources.validé
+                          End If
+                      End Sub)
+        End If
     End Sub
 
     Private Sub Panel2_Click(sender As Object, e As EventArgs) Handles Panel2.Click
@@ -725,10 +717,6 @@ er:
         PictureBox1.Image = My.Resources.attente
         UtilisateursRecherche.Clear()
         DataGridView1.Rows.Clear()
-        If retoursThread.IsAlive Then
-            retoursThread.Interrupt()
-            retoursThread.Join()
-        End If
         While utilisateursThreads.Count > 0
             If Not utilisateursThreads(0).IsAlive Then
                 utilisateursThreads.RemoveAt(0)
@@ -743,6 +731,10 @@ er:
                 IO.Directory.Delete(directory, True)
                 On Error GoTo er
             End If
+        Next
+        For Each user In utilisateurs
+            RemoveHandler user.StateChanged, AddressOf GererRetours
+            RemoveHandler user.NewMails, AddressOf NewMails
         Next
         directoriesToDelete.Clear()
         Application.Exit()
