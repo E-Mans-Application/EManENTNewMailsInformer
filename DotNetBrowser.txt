@@ -1,5 +1,3 @@
-EManENTNewMailsInformer utilise DotNetBrowser, un logiciel propriétaire de TeamDev. Ce logiciel est protégé par les lois
-internationales relatives aux droits d'auteur. Tous les droits sur celui-ci sont réservés par TeamDev.
+EManENTNewMailsInformer utilise DotNetBrowser http://www.teamdev.com/dotnetbrowser, un logiciel propriétaire de TeamDev. L'utilisation de DotNetBrowser est régie par le Contrat de Licence de DotNetBrowser http://www.teamdev.com/dotnetbrowser-licence-agreement. Si vous souhaitez utiliser DotNetBrowser dans le développement d'une de vos applications, veuillez contacter TeamDev.
 
-EManENTNewMailsInfomer uses DotNetBrowser, a software owned by TeamDev. This software is copyrighted and protected
-by copyright laws. All rights are reserved by TeamDev.
+EManENTNewMailsInformer uses DotNetBrowser http://www.teamdev.com/dotnetbrowser, which is a proprietary software. The use of DotNetBrowser is governed by the DotNetBrowser Product Licence Agreement http://www.teamdev.com/dotnetbrowser-licence-agreement. If you would like to use DotNetBrowser in your development, please contact TeamDev.
