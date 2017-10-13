@@ -6,6 +6,7 @@ passe arbitraire. Ce mot de passe sera alors nécessaire pour déchiffrer le fic
 Vous devrez donc l'entrer à chaque démarrage du programme.
 Toutes quetions, remarques ou suggestions peuvent être adressées à E__Man's Application (emansassociation@gmail.com).
 Vous pouvez consulter toutes les applications d'E__Man's Application sur le site web : https://emansapplication.000webhostapp.com/.
+EManENTNewMailsInformer utilise DotNetBrowser http://www.teamdev.com/dotnetbrowser, un logiciel propriétaire de TeamDev. L'utilisation de DotNetBrowser est régie par le Contrat de Licence de DotNetBrowser http://www.teamdev.com/dotnetbrowser-licence-agreement. Si vous souhaitez utiliser DotNetBrowser dans le développement d'une de vos applications, veuillez contacter TeamDev.
 
 # EManENTNewMailsInformer is an application for automatically acknowledging receipt of new mails on supported ENT platforms.
 Login details you give the program are only used in this aim; they are never disclosed to third parties. They are encrypted and
@@ -14,3 +15,4 @@ the encryption key by specifying an arbitrary password. This password will be ne
 details. Therefore you will have to enter it every time the program starts.
 Any questions, comments or suggestions can be sent to E__Man's Application (emansassociation@gmail.com).
 You can see all E__Man's Application's applications on the website: https://emansapplication.000webhostapp.com/.
+EManENTNewMailsInformer uses DotNetBrowser http://www.teamdev.com/dotnetbrowser, which is a proprietary software. The use of DotNetBrowser is governed by the DotNetBrowser Product Licence Agreement http://www.teamdev.com/dotnetbrowser-licence-agreement. If you would like to use DotNetBrowser in your development, please contact TeamDev.
