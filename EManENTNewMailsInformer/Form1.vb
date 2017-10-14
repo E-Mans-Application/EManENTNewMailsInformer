@@ -1,13 +1,10 @@
 ﻿Option Strict On
 Option Explicit On
-Imports System.Net
-Imports System.Net.Sockets
+
 Imports System.Threading
 Imports Microsoft.Win32
 Imports DotNetBrowser
-Imports DotNetBrowser.WinForms
 Imports System.IO
-Imports System.Security
 
 Public Class Form1
 
@@ -236,7 +233,7 @@ er:
                           a.Show()
                           a.BringToFront()
                       End Sub)
-        ElseIf label1.Text = "Nouveaux messages." Then
+        ElseIf Label1.Text = "Nouveaux messages." Then
             Label1.Text = "Recherche des nouveaux messages..."
             Label1.ForeColor = Color.Green
             PictureBox1.Image = My.Resources.validé
@@ -359,7 +356,7 @@ er:
                     End If
                 End If
             End If
-                While Not quitting
+            While Not quitting
                 Thread.Sleep(30000)
                 Dim nm As UShort
                 Try
