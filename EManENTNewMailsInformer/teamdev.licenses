@@ -1,13 +1,13 @@
 Product: DotNetBrowser
 Version: 1.x
 Licensed to: 
-License type: Development
-License info: Single-user license
-Product binding: Bound to type name
-Product binding info: 1ggwg6lwj1606lnq6ejrc0gdivuj8uqqlcr8odptr701
+License type: Runtime
+License info: Not for development
+Product binding: Bound to project
+Product binding info: -18an1hjulmfnmwz1y7cl859459tk2way5w0lhqmy7izf3
 Expiration date: NEVER
 Generation date: 13-10-2017
 Platforms: win32/x64;win32/x86
 Company name: EManENTNewMailsInformer
-SigB: f227zc52bptli0mf2f90bkmiumyzw2z44yyu3sdd3boql6gnjvv2od7nop81e31cppaoipkqrxabojkb
-SigA: 6oanw3w63t3p7xhkvjhky20hka57nzlut65dz9c0n743utzlj7act4112zf7y0h1je8gplosjw5c5yc7
+SigB: vnavsdp8o5xdwwfm6728ft9by1883ifqkwm9vlyn1h66rnzgdp7df77iig6jgf11g0a3uds0r7aper9b
+SigA: pwpwqbpo74npm3759j0rxhk2apy7kzjcijpdg9nk3qryfnmrz7uzvb5lur917fvt4fr5ze5h2ub3f8g4
